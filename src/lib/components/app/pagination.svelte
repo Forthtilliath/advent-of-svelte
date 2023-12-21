@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { range } from '$lib/utils';
-	import Button from './button.svelte';
+	import { ChevronLeft, ChevronRight } from 'lucide-svelte';
+	import { Button } from '$lib/components/ui/button';
 
 	type $$Props = {
 		/** Nombre de pages */
@@ -111,38 +112,50 @@
 	}
 </script>
 
-<div>
-	<Button {onChange} to={page - 1} disabled={page === 1}>&lt;</Button>
+<div class="flex gap-1">
+	<Button
+		variant="ghost"
+		size="icon"
+		rounded="full"
+		disabled={page === 1}
+		on:click={(e) => onChange(e, page - 1)}
+	>
+		<span class="sr-only">Previous page</span>
+		<ChevronLeft className="h-4 w-4" />
+	</Button>
 
 	{#each pagination as p}
 		{#if p >= 0}
-			<Button {onChange} active={p === page} to={p}>
+			<Button
+				variant="ghost"
+				size="icon"
+				rounded="full"
+				class={p === page ? 'bg-accent text-accent-foreground' : ''}
+				on:click={(e) => onChange(e, p)}
+			>
 				{p}
 			</Button>
 		{:else}
-			<span class="spread">…</span>
+			<Button
+				variant="ghost"
+				size="icon"
+				rounded="full"
+				disabled={true}
+				on:click={(e) => onChange(e, page)}
+			>
+				…
+			</Button>
 		{/if}
 	{/each}
 
-	<Button {onChange} to={page + 1} disabled={page === count}>&gt;</Button>
+	<Button
+		variant="ghost"
+		size="icon"
+		rounded="full"
+		disabled={page === count}
+		on:click={(e) => onChange(e, page + 1)}
+	>
+		<span class="sr-only">Next page</span>
+		<ChevronRight className="h-4 w-4" />
+	</Button>
 </div>
-
-<style>
-	.spread {
-		display: inline-block;
-		user-select: none;
-		font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
-		font-weight: 400;
-		font-size: 0.875rem;
-		line-height: 1.43;
-		letter-spacing: 0.01071em;
-		border-radius: 16px;
-		text-align: center;
-		box-sizing: border-box;
-		min-width: 32px;
-		padding: 0 6px;
-		margin: 0 3px;
-		color: rgba(255, 255, 255, 0.87);
-		height: auto;
-	}
-</style>
