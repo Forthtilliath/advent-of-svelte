@@ -35,7 +35,7 @@
 
 	/**
 	 * Liste des numéros de pages contenus dans la pagination
-	 * Les spreads ont les valeurs -1 et -2 afin d'afficher un span spécial
+	 * Les spreads ont la valeur -1 afin d'afficher un span spécial
 	 */
 	let pagination = $derived(
 		getPagination(nbPagesDisplay, count, allPages, siblingCount, boundaryCount, page)
@@ -49,9 +49,10 @@
 		boundaryCount: number,
 		currentPage: number
 	): Set<number> {
+		function getBoundaryStartPage() {
 		const pagination = new Set<number>();
 		if (nbPagesDisplay >= count) {
-			allPages.reduce((s, e) => s.add(e), pagination);
+			allPages.forEach((page) => pagination.add(page));
 		} else {
 			const pagesStart = allPages.slice(
 				0,
@@ -63,17 +64,17 @@
 			);
 
 			/** Contient les pages de début */
-			let boundaryStart = [] as number[];
+			let boundaryStart: number[] = [];
 			if (pagesStart.includes(currentPage)) {
 				boundaryStart = pagesStart.slice(0);
 				if (siblingCount > 0) {
 					const nexts = allPages.slice(pagesStart.length, pagesStart.length + siblingCount);
-					boundaryStart.push(...nexts);
+					nexts.forEach((next) => boundaryStart.push(next));
 				}
 			} else {
 				boundaryStart = allPages.slice(0, boundaryCount);
 			}
-			boundaryStart.reduce((s, e) => s.add(e), pagination);
+			boundaryStart.forEach((page) => pagination.add(page));
 
 			pagination.add(-1);
 
@@ -86,7 +87,7 @@
 						count - pagesEnd.length - siblingCount,
 						count - pagesEnd.length
 					);
-					boundaryEnd.unshift(...prevs);
+					prevs.forEach((prev) => boundaryEnd.unshift(prev));
 				}
 			} else {
 				boundaryEnd = allPages.slice(
@@ -96,58 +97,37 @@
 
 			let siblingPages: number[] = [];
 			if (!pagesStart.includes(currentPage) && !pagesEnd.includes(currentPage)) {
-				siblingPages = [...siblingPages, ...allPages.slice(currentPage - siblingCount - 1, currentPage - 1)];
+				siblingPages.push(...allPages.slice(currentPage - siblingCount - 1, currentPage - 1));
 				siblingPages.push(currentPage);
-				siblingPages = [...siblingPages, ...allPages.slice(currentPage, currentPage + siblingCount)];
+				siblingPages.push(...allPages.slice(currentPage, currentPage + siblingCount));
 				pagination.add(-1);
 			}
-			siblingPages.reduce((s, e) => s.add(e), pagination);
+			siblingPages.forEach((page) => pagination.add(page));
 			if (!pagesStart.includes(currentPage) && !pagesEnd.includes(currentPage)) {
-				pagination.add(-2);
+				pagination.add(-1);
 			}
 
-			boundaryEnd.reduce((s, e) => s.add(e), pagination);
+			boundaryEnd.forEach((page) => pagination.add(page));
 		}
 		return pagination;
 	}
 </script>
 
 <div class="flex gap-1">
-	<Button
-		variant="ghost"
-		size="icon"
-		rounded="full"
-		disabled={page === 1}
-		on:click={(e) => onChange(e, page - 1)}
-	>
-		<span class="sr-only">Previous page</span>
-		<ChevronLeft className="h-4 w-4" />
-	</Button>
-	{@render buttonPaginate({ page: page - 1, disabled: page === 1 })}
+	{@render buttonPaginate({ page: page - 1, disabled: page === 1, label: 'prev' })}
 
 	{#each pagination as p}
 		{#if p >= 0}
-			{@render buttonPaginate({ active: p === page, page: p })}
+			{@render buttonPaginate({ active: p === page, page: p, label: p.toString() })}
 		{:else}
-			{@render buttonPaginate({ active: p === page })}
+			{@render buttonPaginate({ active: p === page, disabled: true, label: '…' })}
 		{/if}
 	{/each}
 
-	<Button
-		variant="ghost"
-		size="icon"
-		rounded="full"
-		disabled={page === count}
-		on:click={(e) => onChange(e, page + 1)}
-	>
-		<span class="sr-only">Next page</span>
-		<ChevronRight className="h-4 w-4" />
-	</Button>
+	{@render buttonPaginate({ page: page + 1, disabled: page === count, label: 'next' })}
 </div>
 
-{#snippet buttonPaginate({
-	active = false, page, disabled, label = page?.toString() ?? '…'
-}: {active?: boolean, page?: number, disabled?: boolean, label?: string})}
+{#snippet buttonPaginate({ active = false, page, disabled, label }: {active?: boolean, page?: number, disabled?: boolean, label: string})}
 	{@const onClick = page ? (e:MouseEvent) => onChange(e, page) :  (e:MouseEvent)=>{}}
 	<Button
 		variant="ghost"
@@ -157,6 +137,14 @@
 		{disabled}
 		on:click={onClick}
 	>
-		{label}
+		{#if label === 'prev'}
+			<span class="sr-only">Previous page</span>
+			<ChevronLeft className="h-4 w-4" />
+		{:else if label === 'next'}
+			<span class="sr-only">Next page</span>
+			<ChevronRight className="h-4 w-4" />
+		{:else}
+			{label}
+		{/if}
 	</Button>
 {/snippet}

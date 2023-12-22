@@ -59,7 +59,6 @@
 	</div>
 	<div>
 		<div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-			<Button active={true} onChange={handleClick} disabled={false} to={42}>Click me</Button>
 			<Pagination count={10} page={page} onChange={handleClick} />
 			<Pagination count={10} page={page} onChange={handleClick} siblingCount={0} />
 			<Pagination count={10} page={page} onChange={handleClick} siblingCount={2} />
