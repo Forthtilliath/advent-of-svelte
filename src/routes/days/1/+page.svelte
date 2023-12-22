@@ -2,7 +2,7 @@
 	import * as Table from '$lib/components/ui/table';
 	import { Badge } from '$lib/components/ui/badge';
 	import Button from '$lib/components/app/button.svelte';
-	import Pagination from '$lib/components/app/pagination.svelte';
+	import Pagination from '$lib/components/shared/pagination.svelte';
 
 	const { data } = $props();
 	let page = $state(1);

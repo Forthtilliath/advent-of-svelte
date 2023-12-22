@@ -47,8 +47,8 @@
 		allPages: number[],
 		siblingCount: number,
 		boundaryCount: number,
-		page: number
-	) {
+		currentPage: number
+	): Set<number> {
 		const pagination = new Set<number>();
 		if (nbPagesDisplay >= count) {
 			allPages.reduce((s, e) => s.add(e), pagination);
@@ -64,7 +64,7 @@
 
 			/** Contient les pages de début */
 			let boundaryStart = [] as number[];
-			if (pagesStart.includes(page)) {
+			if (pagesStart.includes(currentPage)) {
 				boundaryStart = pagesStart.slice(0);
 				if (siblingCount > 0) {
 					const nexts = allPages.slice(pagesStart.length, pagesStart.length + siblingCount);
@@ -78,8 +78,8 @@
 			pagination.add(-1);
 
 			/** Contient les pages de fin */
-			let boundaryEnd = [] as number[];
-			if (pagesEnd.includes(page)) {
+			let boundaryEnd: number[] = [];
+			if (pagesEnd.includes(currentPage)) {
 				boundaryEnd = pagesEnd.slice(0);
 				if (siblingCount > 0) {
 					const prevs = allPages.slice(
@@ -94,15 +94,15 @@
 				);
 			}
 
-			let siblingPages = [] as number[];
-			if (!pagesStart.includes(page) && !pagesEnd.includes(page)) {
-				siblingPages = [...siblingPages, ...allPages.slice(page - siblingCount - 1, page - 1)];
-				siblingPages.push(page);
-				siblingPages = [...siblingPages, ...allPages.slice(page, page + siblingCount)];
+			let siblingPages: number[] = [];
+			if (!pagesStart.includes(currentPage) && !pagesEnd.includes(currentPage)) {
+				siblingPages = [...siblingPages, ...allPages.slice(currentPage - siblingCount - 1, currentPage - 1)];
+				siblingPages.push(currentPage);
+				siblingPages = [...siblingPages, ...allPages.slice(currentPage, currentPage + siblingCount)];
 				pagination.add(-1);
 			}
 			siblingPages.reduce((s, e) => s.add(e), pagination);
-			if (!pagesStart.includes(page) && !pagesEnd.includes(page)) {
+			if (!pagesStart.includes(currentPage) && !pagesEnd.includes(currentPage)) {
 				pagination.add(-2);
 			}
 
@@ -123,28 +123,13 @@
 		<span class="sr-only">Previous page</span>
 		<ChevronLeft className="h-4 w-4" />
 	</Button>
+	{@render buttonPaginate({ page: page - 1, disabled: page === 1 })}
 
 	{#each pagination as p}
 		{#if p >= 0}
-			<Button
-				variant="ghost"
-				size="icon"
-				rounded="full"
-				class={p === page ? 'bg-accent text-accent-foreground' : ''}
-				on:click={(e) => onChange(e, p)}
-			>
-				{p}
-			</Button>
+			{@render buttonPaginate({ active: p === page, page: p })}
 		{:else}
-			<Button
-				variant="ghost"
-				size="icon"
-				rounded="full"
-				disabled={true}
-				on:click={(e) => onChange(e, page)}
-			>
-				…
-			</Button>
+			{@render buttonPaginate({ active: p === page })}
 		{/if}
 	{/each}
 
@@ -159,3 +144,19 @@
 		<ChevronRight className="h-4 w-4" />
 	</Button>
 </div>
+
+{#snippet buttonPaginate({
+	active = false, page, disabled, label = page?.toString() ?? '…'
+}: {active?: boolean, page?: number, disabled?: boolean, label?: string})}
+	{@const onClick = page ? (e:MouseEvent) => onChange(e, page) :  (e:MouseEvent)=>{}}
+	<Button
+		variant="ghost"
+		size="icon"
+		rounded="full"
+		class={active ? 'bg-accent text-accent-foreground' : ''}
+		{disabled}
+		on:click={onClick}
+	>
+		{label}
+	</Button>
+{/snippet}
