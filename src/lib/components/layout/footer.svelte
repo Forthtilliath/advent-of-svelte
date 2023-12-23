@@ -1,3 +1,3 @@
 <footer class="w-full py-6 text-center">
-  <span>Advent of Svelte 2023 - by Forth</span>
+  <span><a href="https://advent.sveltesociety.dev/#challenges" target="_blank" rel="noreferrer">Advent of Svelte 2023</a> - by Forth</span>
 </footer>
