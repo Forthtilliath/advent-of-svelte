@@ -1,4 +1,7 @@
 {
+	"svelteSortOrder": "options-scripts-markup-styles",
+	"svelteBracketNewLine": false,
+	"svelteIndentScriptAndStyle": false,
 	"useTabs": true,
 	"singleQuote": true,
 	"trailingComma": "none",
