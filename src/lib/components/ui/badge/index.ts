@@ -2,7 +2,7 @@ import { tv, type VariantProps } from 'tailwind-variants';
 export { default as Badge } from './badge.svelte';
 
 export const badgeVariants = tv({
-	base: 'inline-flex items-center border rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none select-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+	base: 'inline-flex items-center border rounded-full text-xs font-semibold transition-colors focus:outline-none select-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
 	variants: {
 		variant: {
 			default: 'bg-primary hover:bg-primary/80 border-transparent text-primary-foreground',
@@ -11,11 +11,17 @@ export const badgeVariants = tv({
 				'bg-destructive hover:bg-destructive/80 border-transparent text-destructive-foreground',
 			success: 'bg-success hover:bg-success/80 border-transparent text-success-foreground',
 			outline: 'text-foreground'
+		},
+		space: {
+			default: 'px-2.5 py-0.5',
+			lg: 'px-3.5 py-1.5'
 		}
 	},
 	defaultVariants: {
-		variant: 'default'
+		variant: 'default',
+		space: 'default'
 	}
 });
 
 export type Variant = VariantProps<typeof badgeVariants>['variant'];
+export type Space = VariantProps<typeof badgeVariants>['space'];
