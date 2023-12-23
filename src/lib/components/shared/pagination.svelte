@@ -3,6 +3,21 @@
 	import { ChevronLeft, ChevronRight } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 
+	/**
+	 * @example
+	 ** <Pagination count={11} {6} siblingCount={0} />
+	 *? output: < 1 … 6 … 11 >
+	 *
+	 ** <Pagination count={11} {6} />
+	 *? output: < 1 … 5 6 7 … 11 >
+	 *
+	 ** <Pagination count={11} {6} siblingCount={0} boundaryCount={2} />
+	 *? output: < 1 2 … 6 … 10 11 >
+	 *
+	 ** <Pagination count={11} {6} boundaryCount={2} />
+	 *? output: < 1 2 … 5 6 7 … 10 11 >
+	 */ 
+
 	type $$Props = {
 		/** Nombre de pages */
 		count: number;
