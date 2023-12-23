@@ -18,6 +18,9 @@
 
 	let { count, page, siblingCount = 1, boundaryCount = 1, onChange } = $props<$$Props>();
 
+	const SPREAD_LEFT = -1;
+	const SPREAD_RIGHT = -2;
+
 	/** Contient toutes les pages */
 	const allPages = $state(range(1, count));
 
@@ -34,12 +37,14 @@
 	);
 
 	/**
-	 * Liste des numéros de pages contenus dans la pagination
-	 * Les spreads ont la valeur -1 afin d'afficher un span spécial
+	 * Liste des numéros de pages contenus dans la pagination.
+	 *
+	 * Les spreads ont des valeurs négatives afin d'afficher un span spécial.
 	 */
 	let pagination = $derived(
 		getPagination(nbPagesDisplay, count, allPages, siblingCount, boundaryCount, page)
 	);
+	$inspect(pagination);
 
 	function getPagination(
 		nbPagesDisplay: number,
@@ -49,65 +54,89 @@
 		boundaryCount: number,
 		currentPage: number
 	): Set<number> {
-		function getBoundaryStartPage() {
+		function getPreviousPages(startingPages: Set<number>): Set<number> {
+			const previousPages = new Set<number>();
+
+			if (startingPages.has(currentPage)) {
+				startingPages.forEach((page) => previousPages.add(page));
+				if (siblingCount > 0) {
+					const prevSiblingPages = allPages.slice(
+						startingPages.size,
+						startingPages.size + siblingCount
+					);
+					prevSiblingPages.forEach((page) => previousPages.add(page));
+				}
+			} else {
+				const prevBoundaryPages = allPages.slice(0, boundaryCount);
+				prevBoundaryPages.forEach((page) => previousPages.add(page));
+			}
+
+			previousPages.add(SPREAD_LEFT);
+
+			return previousPages;
+		}
+
+		function getMiddlePages(startingPages: Set<number>, endingPages: Set<number>): Set<number> {
+			const middlePages = new Set<number>();
+
+			if (!startingPages.has(currentPage) && !endingPages.has(currentPage)) {
+				const nextSiblingPages = allPages.slice(
+					currentPage - siblingCount - 1,
+					currentPage + siblingCount
+				);
+				nextSiblingPages.forEach((page) => middlePages.add(page));
+
+				middlePages.add(SPREAD_RIGHT);
+			}
+
+			return middlePages;
+		}
+
+		function getNextPages(endingPages: Set<number>): Set<number> {
+			const nextPages = new Set<number>();
+
+			if (endingPages.has(currentPage)) {
+				if (siblingCount > 0) {
+					const nextSiblingPages = allPages.slice(
+						count - endingPages.size - siblingCount,
+						count - endingPages.size
+					);
+					nextSiblingPages.forEach((page) => nextPages.add(page));
+				}
+				endingPages.forEach((page) => nextPages.add(page));
+			} else {
+				const nextBoundaryPages = allPages.slice(
+					count - boundaryCount - /** index array */ 1 + /** element */ 1
+				);
+				nextBoundaryPages.forEach((page) => nextPages.add(page));
+			}
+
+			return nextPages;
+		}
+
 		const pagination = new Set<number>();
 		if (nbPagesDisplay >= count) {
 			allPages.forEach((page) => pagination.add(page));
 		} else {
-			const pagesStart = allPages.slice(
-				0,
-				/** spread */ 1 + boundaryCount + /** page */ 1 + siblingCount
+			/** Contient l'ensemble des pages de début si la page courante est la première page */
+			const startingPages = new Set(
+				allPages.slice(0, /** spread */ 1 + boundaryCount + /** page */ 1 + siblingCount)
 			);
 
-			const pagesEnd = allPages.slice(
-				/** spread */ count - siblingCount - boundaryCount - /** page */ 1 - /** index array */ 1
+			/** Contient l'ensemble des pages de fin si la page courante est la dernière page */
+			const endingPages = new Set(
+				allPages.slice(
+					/** spread */ count - siblingCount - boundaryCount - /** page */ 1 - /** index array */ 1
+				)
 			);
 
-			/** Contient les pages de début */
-			let boundaryStart: number[] = [];
-			if (pagesStart.includes(currentPage)) {
-				boundaryStart = pagesStart.slice(0);
-				if (siblingCount > 0) {
-					const nexts = allPages.slice(pagesStart.length, pagesStart.length + siblingCount);
-					nexts.forEach((next) => boundaryStart.push(next));
-				}
-			} else {
-				boundaryStart = allPages.slice(0, boundaryCount);
-			}
-			boundaryStart.forEach((page) => pagination.add(page));
+			let previousPages: Set<number> = getPreviousPages(startingPages);
+			let middlePages: Set<number> = getMiddlePages(startingPages, endingPages);
+			let nextPages: Set<number> = getNextPages(endingPages);
 
-			pagination.add(-1);
-
-			/** Contient les pages de fin */
-			let boundaryEnd: number[] = [];
-			if (pagesEnd.includes(currentPage)) {
-				boundaryEnd = pagesEnd.slice(0);
-				if (siblingCount > 0) {
-					const prevs = allPages.slice(
-						count - pagesEnd.length - siblingCount,
-						count - pagesEnd.length
-					);
-					prevs.forEach((prev) => boundaryEnd.unshift(prev));
-				}
-			} else {
-				boundaryEnd = allPages.slice(
-					count - boundaryCount - /** index array */ 1 + /** element */ 1
-				);
-			}
-
-			let siblingPages: number[] = [];
-			if (!pagesStart.includes(currentPage) && !pagesEnd.includes(currentPage)) {
-				siblingPages.push(...allPages.slice(currentPage - siblingCount - 1, currentPage - 1));
-				siblingPages.push(currentPage);
-				siblingPages.push(...allPages.slice(currentPage, currentPage + siblingCount));
-				pagination.add(-1);
-			}
-			siblingPages.forEach((page) => pagination.add(page));
-			if (!pagesStart.includes(currentPage) && !pagesEnd.includes(currentPage)) {
-				pagination.add(-1);
-			}
-
-			boundaryEnd.forEach((page) => pagination.add(page));
+			previousPages.forEach((page) => pagination.add(page));
+			middlePages.forEach((page) => pagination.add(page));
+			nextPages.forEach((page) => pagination.add(page));
 		}
 		return pagination;
 	}
