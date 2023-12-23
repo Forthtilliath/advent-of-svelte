@@ -44,8 +44,18 @@
 	let pagination = $derived(
 		getPagination(nbPagesDisplay, count, allPages, siblingCount, boundaryCount, page)
 	);
-	$inspect(pagination);
 
+	/**
+	 * Returns a set of pagination numbers based on the provided parameters.
+	 *
+	 * @param nbPagesDisplay - The number of pages to display.
+	 * @param count - The total number of pages.
+	 * @param allPages - An array of all available pages.
+	 * @param siblingCount - The number of sibling pages to display on each side of the current page.
+	 * @param boundaryCount - The number of boundary pages to display at the start and end.
+	 * @param currentPage - The current page number.
+	 * @returns A set of pagination numbers.
+	 */
 	function getPagination(
 		nbPagesDisplay: number,
 		count: number,
@@ -60,14 +70,13 @@
 			if (startingPages.has(currentPage)) {
 				startingPages.forEach((page) => previousPages.add(page));
 				if (siblingCount > 0) {
-					const prevSiblingPages = allPages.slice(
-						startingPages.size,
-						startingPages.size + siblingCount
+					const prevSiblingPages = new Set(
+						allPages.slice(startingPages.size, startingPages.size + siblingCount)
 					);
 					prevSiblingPages.forEach((page) => previousPages.add(page));
 				}
 			} else {
-				const prevBoundaryPages = allPages.slice(0, boundaryCount);
+				const prevBoundaryPages = new Set(allPages.slice(0, boundaryCount));
 				prevBoundaryPages.forEach((page) => previousPages.add(page));
 			}
 
@@ -84,7 +93,9 @@
 					currentPage - siblingCount - 1,
 					currentPage + siblingCount
 				);
-				nextSiblingPages.forEach((page) => middlePages.add(page));
+				for (const page of nextSiblingPages) {
+					middlePages.add(page);
+				}
 
 				middlePages.add(SPREAD_RIGHT);
 			}
@@ -97,18 +108,15 @@
 
 			if (endingPages.has(currentPage)) {
 				if (siblingCount > 0) {
-					const nextSiblingPages = allPages.slice(
-						count - endingPages.size - siblingCount,
-						count - endingPages.size
-					);
-					nextSiblingPages.forEach((page) => nextPages.add(page));
+					for (let i = count - endingPages.size - siblingCount; i < count - endingPages.size; i++) {
+						nextPages.add(allPages[i]!);
+					}
 				}
 				endingPages.forEach((page) => nextPages.add(page));
 			} else {
-				const nextBoundaryPages = allPages.slice(
-					count - boundaryCount - /** index array */ 1 + /** element */ 1
-				);
-				nextBoundaryPages.forEach((page) => nextPages.add(page));
+				for (let i = count - boundaryCount - 1 + 1; i < allPages.length; i++) {
+					nextPages.add(allPages[i]!);
+				}
 			}
 
 			return nextPages;
