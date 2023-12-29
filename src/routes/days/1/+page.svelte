@@ -6,6 +6,7 @@ import Button from '$lib/components/ui/button/button.svelte';
 import { ChildrenSchema, type Child } from './schemas.js';
 import { usePagination, type UsePagination } from '$lib/hooks/usePagination.svelte';
 import { useStorage } from '$lib/hooks/useStorage.svelte';
+import { createCounter } from '$lib/hooks/createCounter.js';
 
 const { data } = $props();
 
@@ -21,21 +22,10 @@ $effect(() => {
 	localStorage.setItem('children', JSON.stringify(children));
 });
 
-function handleClick(_event: MouseEvent, value: number) {
-	if (!pagination) return;
-
-	pagination.page = value;
-}
-
-function decrement(child: Child) {
-	child.tally -= 1;
-}
-function reset(child: Child) {
-	child.tally = 0;
-}
-function increment(child: Child) {
-	child.tally += 1;
-}
+// function handleClick(_event: MouseEvent, value: number) {
+// 	if (!pagination) return;
+// 	pagination.page = value;
+// }
 </script>
 
 <div class="grid grid-cols-2 gap-4">
@@ -58,32 +48,31 @@ function increment(child: Child) {
 					</Table.Header>
 					<Table.Body>
 						{#each pagination.dataOnPage as child}
+							{@const tally = createCounter((v) => (child.tally = v), child.tally)}
 							<Table.Row>
 								<Table.Cell class="font-medium">{child.name}</Table.Cell>
 								<Table.Cell class="text-center">
-									{#if child.tally > 0}
-										<span class="text-green-500">+{child.tally}</span>
-									{:else if child.tally === 0}
-										<span class="text-slate-50">{child.tally}</span>
+									{#if tally.value > 0}
+										<span class="text-green-500">+{tally.value}</span>
+									{:else if tally.value === 0}
+										<span class="text-slate-50">{tally.value}</span>
 									{:else}
-										<span class="text-red-500">{child.tally}</span>
+										<span class="text-red-500">{tally.value}</span>
 									{/if}
 								</Table.Cell>
 								<Table.Cell class="text-center">
-									{#if child.tally > 0}
+									{#if tally.value > 0}
 										<Badge variant="success" space="lg">Nice</Badge>
-									{:else if child.tally === 0}
+									{:else if tally.value === 0}
 										<Badge variant="secondary" space="lg">-</Badge>
 									{:else}
 										<Badge variant="destructive" space="lg">Naughty</Badge>
 									{/if}
 								</Table.Cell>
 								<Table.Cell class="text-center">
-									<Button on:click={() => decrement(child)} size="sm" variant="destructive"
-										>-1</Button>
-									<Button on:click={() => reset(child)} size="sm" variant="secondary">Reset</Button>
-									<Button on:click={() => increment(child)} size="icon-sm" variant="success"
-										>+1</Button>
+									<Button on:click={tally.decrement} size="sm" variant="destructive">-1</Button>
+									<Button on:click={tally.reset} size="sm" variant="secondary">Reset</Button>
+									<Button on:click={tally.increment} size="icon-sm" variant="success">+1</Button>
 								</Table.Cell>
 							</Table.Row>
 						{/each}
@@ -108,7 +97,7 @@ function increment(child: Child) {
 						<Pagination
 							count={pagination.numberOfPages}
 							page={pagination.page}
-							onChange={handleClick}
+							onChange={pagination.handleClick}
 							siblingCount={0} />
 					{/key}
 				</div>
