@@ -18,14 +18,29 @@ export function usePagination<T = unknown>(
 		};
 	});
 
-  return {
-    get page() { return page },
-    set page(value) { page = value },
-    get dataOnPage() { return dataOnPage },
-    get numberOfPages() { return numberOfPages },
-    get rowPerPage() { return rowPerPage },
-    set rowPerPage(value) { rowPerPage = value },
-  }
+	return {
+		get page() {
+			return page;
+		},
+		set page(value) {
+			page = value;
+		},
+		get dataOnPage() {
+			return dataOnPage;
+		},
+		get numberOfPages() {
+			return numberOfPages;
+		},
+		get rowPerPage() {
+			return rowPerPage;
+		},
+		set rowPerPage(value) {
+			rowPerPage = value;
+		},
+		handleClick: (_event: MouseEvent, newValue: number) => {
+			page = newValue;
+		}
+	};
 }
 
-export type UsePagination<T> = ReturnType<typeof usePagination<T>>
+export type UsePagination<T> = ReturnType<typeof usePagination<T>>;
