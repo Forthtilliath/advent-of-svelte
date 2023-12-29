@@ -178,7 +178,7 @@ function getPagination(
 </div>
 
 {#snippet buttonPaginate({ active = false, page, disabled, label }: {active?: boolean, page?: number, disabled?: boolean, label: string})}
-	{@const onClick = page ? (e:MouseEvent) => onChange(e, page) :  (e:MouseEvent)=>{}}
+	{@const onClick = page ? (e:MouseEvent) => onChange(e, page) :  (e:MouseEvent) => {}}
 	<Button
 		variant="ghost"
 		size="icon"
