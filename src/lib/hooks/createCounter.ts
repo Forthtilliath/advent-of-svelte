@@ -32,7 +32,7 @@ export function createCounter(updater: (v: number) => void, initialValue = 0) {
 			updater(value);
 		},
 		reset() {
-			value = initialValue;
+			value = 0;
 			updater(value);
 		}
 	};
