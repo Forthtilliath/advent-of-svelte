@@ -40,6 +40,8 @@
 	"type": "module",
 	"dependencies": {
 		"bits-ui": "^0.11.8",
+		"formsnap": "^0.4.2",
+		"sveltekit-superforms": "^1.13.1",
 		"tailwind-variants": "^0.1.19"
 	}
 }
