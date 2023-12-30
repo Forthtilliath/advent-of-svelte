@@ -1,11 +1,11 @@
 # Day 1 - Naughty or Nice
 
-## Table des matières
+## Table of Contents
 
-1. [Introduction](#introduction)
+- [Introduction](#introduction)
   * [Project Objective](#project-objective)
   * [Used Technologies](#used-technologies)
-2. [Project Structure](#project-structure)
+- [Project Structure](#project-structure)
   * [Src Folder](#src-folder)
   * [Specific Files](#specific-files)
 
