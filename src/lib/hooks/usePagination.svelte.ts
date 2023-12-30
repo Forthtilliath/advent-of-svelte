@@ -1,11 +1,11 @@
 export function usePagination<T = unknown>(
 	input: Array<T>,
-	rowPerPage_: number,
+	initialRowPerPage: number,
 	defaultPage: number = 1
 ) {
 	const data = $state([...input]);
 	let page = $state(defaultPage);
-	let rowPerPage = $state(rowPerPage_);
+	let rowPerPage = $state(initialRowPerPage);
 
 	const dataOnPage = $derived(data.slice((page - 1) * rowPerPage, page * rowPerPage));
 	const numberOfPages = $derived(Math.ceil(data.length / rowPerPage));
