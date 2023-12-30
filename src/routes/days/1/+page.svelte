@@ -31,10 +31,6 @@ $effect(() => {
 	pagination = usePagination(children.value, DEFAULT_ROW_PER_PAGE);
 });
 
-$effect(() => {
-	console.log(children.value)
-})
-
 function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
 	const data = Object.fromEntries(new FormData(e.currentTarget));
 
