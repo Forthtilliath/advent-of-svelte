@@ -13,7 +13,7 @@
  * console.log(counter()); // 0
  */
 export function createCounter(updater: (v: number) => void, initialValue = 0) {
-	let value = $state(initialValue);
+	let value = initialValue;
 
 	return {
 		get value() {

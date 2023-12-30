@@ -18,10 +18,6 @@ export function usePagination<T = unknown>(
 		};
 	});
 
-	// $effect(() => {
-	// 	localStorage.setItem('children', JSON.stringify(data));
-	// });
-
 	return {
 		get page() {
 			return page;

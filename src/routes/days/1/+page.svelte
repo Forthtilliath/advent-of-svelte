@@ -5,9 +5,9 @@ import Button from '$lib/components/ui/button/button.svelte';
 import Input from '$lib/components/ui/input/input.svelte';
 import Label from '$lib/components/ui/label/label.svelte';
 import * as Table from '$lib/components/ui/table';
-import { createCounter } from '$lib/hooks/createCounter.svelte.js';
+import { createCounter } from '$lib/hooks/createCounter.js';
 import { usePagination, type UsePagination } from '$lib/hooks/usePagination.svelte';
-import { useStorage } from '$lib/hooks/useStorage.svelte';
+import { useStorage } from '$lib/hooks/useStorage.svelte.js';
 import { z } from 'zod';
 
 import { ChildrenSchema, ChildSchema, type Child } from './schemas.js';
@@ -28,8 +28,12 @@ let children = $state(
 let pagination = $state<UsePagination<Child>>();
 
 $effect(() => {
-		pagination = usePagination(children.value, DEFAULT_ROW_PER_PAGE);
+	pagination = usePagination(children.value, DEFAULT_ROW_PER_PAGE);
 });
+
+$effect(() => {
+	console.log(children.value)
+})
 
 function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
 	const data = Object.fromEntries(new FormData(e.currentTarget));
