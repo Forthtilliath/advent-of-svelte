@@ -6,19 +6,34 @@ type Options<Output = unknown> = {
 };
 
 export function useStorage<T = unknown>(key: string, initialValue: T, options?: Options<T>) {
-	if (!globalThis.window) return initialValue;
+	let value = $state(initialValue);
 
-	const storage = options?.storage === 'session' ? sessionStorage : localStorage;
-	const schema = options?.schema ?? z.custom<T>();
+	if (globalThis.window) {
+		const storage = options?.storage === 'session' ? sessionStorage : localStorage;
+		const schema = options?.schema ?? z.custom<T>();
 
-	const storedValue = storage.getItem(key);
-	const parsedValue = storedValue ? JSON.parse(storedValue) : null;
-	const safeParsedValue = schema.safeParse(parsedValue);
+		const storedValue = storage.getItem(key);
+		const parsedValue = storedValue ? JSON.parse(storedValue) : null;
+		const safeParsedValue = schema.safeParse(parsedValue);
 
-	if (safeParsedValue.success) {
-		return safeParsedValue.data;
+		value = safeParsedValue.success ? safeParsedValue.data : initialValue;
+
+		if (!safeParsedValue.success) {
+			storage.setItem(key, JSON.stringify(initialValue));
+		}
 	}
 
-	storage.setItem(key, JSON.stringify(initialValue));
-	return initialValue;
+	return {
+		get value() {
+			return value;
+		},
+		set value(newValue) {
+			value = newValue;
+			console.log({value, newValue})
+			if (globalThis.window) {
+				const storage = options?.storage === 'session' ? sessionStorage : localStorage;
+				storage.setItem(key, JSON.stringify(newValue));
+			}
+		}
+	};
 }

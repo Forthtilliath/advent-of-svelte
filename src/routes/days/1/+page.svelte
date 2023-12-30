@@ -5,12 +5,14 @@ import Button from '$lib/components/ui/button/button.svelte';
 import Input from '$lib/components/ui/input/input.svelte';
 import Label from '$lib/components/ui/label/label.svelte';
 import * as Table from '$lib/components/ui/table';
-import { createCounter } from '$lib/hooks/createCounter.js';
+import { createCounter } from '$lib/hooks/createCounter.svelte.js';
 import { usePagination, type UsePagination } from '$lib/hooks/usePagination.svelte';
 import { useStorage } from '$lib/hooks/useStorage.svelte';
 import { z } from 'zod';
 
 import { ChildrenSchema, ChildSchema, type Child } from './schemas.js';
+
+const DEFAULT_ROW_PER_PAGE = 10;
 
 const nameSchema = ChildSchema.omit({ tally: true });
 type FieldErrors = z.typeToFlattenedError<z.infer<typeof nameSchema>>['fieldErrors'];
@@ -26,8 +28,7 @@ let children = $state(
 let pagination = $state<UsePagination<Child>>();
 
 $effect(() => {
-	pagination = usePagination(children, 10);
-	localStorage.setItem('children', JSON.stringify(children));
+		pagination = usePagination(children.value, DEFAULT_ROW_PER_PAGE);
 });
 
 function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
@@ -40,15 +41,18 @@ function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
 		return;
 	}
 
-	const name = parsedForm.data.name;
-	if (children.some((child) => child.name === name)) {
+	const { name } = parsedForm.data;
+	if (children.value.some((child) => child.name === name)) {
 		fieldErrors.name = ['Child already accounting'];
 		return;
 	}
 
 	fieldErrors = {};
 	const newChild = { name, tally: 0 };
-	children = [newChild, ...children];
+	children.value = [newChild, ...children.value];
+	if (pagination) {
+		pagination.page = 1;
+	}
 
 	e.currentTarget.reset();
 }
@@ -75,7 +79,10 @@ function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
 					</Table.Header>
 					<Table.Body>
 						{#each pagination.dataOnPage as child}
-							{@const tally = createCounter((v) => (child.tally = v), child.tally)}
+							{@const tally = createCounter((v) => {
+								child.tally = v;
+								children.value = children.value;
+							}, child.tally)}
 							<Table.Row>
 								<Table.Cell class="font-medium">{child.name}</Table.Cell>
 								<Table.Cell class="text-center">

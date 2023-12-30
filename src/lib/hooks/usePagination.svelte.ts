@@ -8,7 +8,7 @@ export function usePagination<T = unknown>(
 	let rowPerPage = $state(rowPerPage_);
 
 	const dataOnPage = $derived(data.slice((page - 1) * rowPerPage, page * rowPerPage));
-	const numberOfPages = $derived(Math.floor(data.length / rowPerPage));
+	const numberOfPages = $derived(Math.ceil(data.length / rowPerPage));
 
 	$effect(() => {
 		numberOfPages;
@@ -17,6 +17,10 @@ export function usePagination<T = unknown>(
 			page = 1;
 		};
 	});
+
+	// $effect(() => {
+	// 	localStorage.setItem('children', JSON.stringify(data));
+	// });
 
 	return {
 		get page() {
