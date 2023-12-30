@@ -3,10 +3,11 @@ import * as Table from '$lib/components/ui/table';
 import { Badge } from '$lib/components/ui/badge';
 import Pagination from '$lib/components/shared/pagination.svelte';
 import Button from '$lib/components/ui/button/button.svelte';
-import { ChildrenSchema, type Child } from './schemas.js';
+import { ChildrenSchema, type Child, ChildSchema } from './schemas.js';
 import { usePagination, type UsePagination } from '$lib/hooks/usePagination.svelte';
 import { useStorage } from '$lib/hooks/useStorage.svelte';
 import { createCounter } from '$lib/hooks/createCounter.js';
+import Input from '$lib/components/ui/input/input.svelte';
 
 const { data } = $props();
 
@@ -22,13 +23,22 @@ $effect(() => {
 	localStorage.setItem('children', JSON.stringify(children));
 });
 
-// function handleClick(_event: MouseEvent, value: number) {
-// 	if (!pagination) return;
-// 	pagination.page = value;
-// }
+function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
+	const data = Object.fromEntries(new FormData(e.currentTarget));
+
+	const nameSchema = ChildSchema.omit({ tally: true });
+	const parsedForm = nameSchema.safeParse(data);
+
+	if (!parsedForm.success) {
+		return;
+	}
+
+	const newChild = { ...parsedForm.data, tally: 0 };
+	children = [newChild, ...children];
+}
 </script>
 
-<div class="grid grid-cols-2 gap-4">
+<div class="grid grid-cols-[1fr_300px] gap-4">
 	<div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-6">
 		<header class="space-y-1.5">
 			<h2 class="text-lg font-semibold leading-none tracking-tight">Naughty or Nice</h2>
@@ -105,6 +115,22 @@ $effect(() => {
 		{/if}
 	</div>
 	<div>
-		<div class="rounded-lg border bg-card text-card-foreground shadow-sm">FORM</div>
+		<div class="rounded-lg border bg-card text-card-foreground shadow-sm">
+			<form {onsubmit}>
+				<div class="p-6 space-y-6">
+					<header class="space-y-1.5">
+						<h2 class="text-lg font-semibold leading-none tracking-tight">Add Child</h2>
+					</header>
+
+					<main>
+						<Input name="name" />
+					</main>
+
+					<footer>
+						<Button type="submit">Add</Button>
+					</footer>
+				</div>
+			</form>
+		</div>
 	</div>
 </div>
