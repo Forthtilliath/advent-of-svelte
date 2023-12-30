@@ -1,8 +1,10 @@
 <script lang="ts">
-	import '../app.pcss';
-	import Header from '$lib/components/layout/header.svelte';
-	import Footer from '$lib/components/layout/footer.svelte';
-	let { children } = $props();
+import Footer from '$lib/components/layout/footer.svelte';
+import Header from '$lib/components/layout/header.svelte';
+
+import '../app.pcss';
+
+let { children } = $props();
 </script>
 
 <svelte:head>

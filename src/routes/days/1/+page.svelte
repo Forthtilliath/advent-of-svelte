@@ -1,13 +1,14 @@
 <script lang="ts">
-import * as Table from '$lib/components/ui/table';
-import { Badge } from '$lib/components/ui/badge';
 import Pagination from '$lib/components/shared/pagination.svelte';
+import { Badge } from '$lib/components/ui/badge';
 import Button from '$lib/components/ui/button/button.svelte';
-import { ChildrenSchema, type Child, ChildSchema } from './schemas.js';
+import Input from '$lib/components/ui/input/input.svelte';
+import * as Table from '$lib/components/ui/table';
+import { createCounter } from '$lib/hooks/createCounter.js';
 import { usePagination, type UsePagination } from '$lib/hooks/usePagination.svelte';
 import { useStorage } from '$lib/hooks/useStorage.svelte';
-import { createCounter } from '$lib/hooks/createCounter.js';
-import Input from '$lib/components/ui/input/input.svelte';
+
+import { ChildrenSchema, ChildSchema, type Child } from './schemas.js';
 
 const { data } = $props();
 
