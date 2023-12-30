@@ -32,8 +32,9 @@ $effect(() => {
 });
 
 function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
-	const data = Object.fromEntries(new FormData(e.currentTarget));
+	e.preventDefault();
 
+	const data = Object.fromEntries(new FormData(e.currentTarget));
 	const parsedForm = nameSchema.safeParse(data);
 
 	if (!parsedForm.success) {
@@ -140,7 +141,7 @@ function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
 	</div>
 	<div class=" order-1 lg:order-2">
 		<div class="rounded-lg border bg-card text-card-foreground shadow-sm">
-			<form {onsubmit}>
+			<form {onsubmit} method="POST">
 				<div class="p-6 space-y-6">
 					<header class="space-y-1.5">
 						<h2 class="text-lg font-semibold leading-none tracking-tight">Add Child</h2>
