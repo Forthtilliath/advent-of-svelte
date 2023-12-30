@@ -3,14 +3,20 @@ import Pagination from '$lib/components/shared/pagination.svelte';
 import { Badge } from '$lib/components/ui/badge';
 import Button from '$lib/components/ui/button/button.svelte';
 import Input from '$lib/components/ui/input/input.svelte';
+import Label from '$lib/components/ui/label/label.svelte';
 import * as Table from '$lib/components/ui/table';
 import { createCounter } from '$lib/hooks/createCounter.js';
 import { usePagination, type UsePagination } from '$lib/hooks/usePagination.svelte';
 import { useStorage } from '$lib/hooks/useStorage.svelte';
+import { z } from 'zod';
 
 import { ChildrenSchema, ChildSchema, type Child } from './schemas.js';
 
+const nameSchema = ChildSchema.omit({ tally: true });
+type FieldErrors = z.typeToFlattenedError<z.infer<typeof nameSchema>>['fieldErrors'];
+
 const { data } = $props();
+let fieldErrors = $state<FieldErrors>({});
 
 let children = $state(
 	useStorage('children', data.children, {
@@ -27,20 +33,30 @@ $effect(() => {
 function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
 	const data = Object.fromEntries(new FormData(e.currentTarget));
 
-	const nameSchema = ChildSchema.omit({ tally: true });
 	const parsedForm = nameSchema.safeParse(data);
 
 	if (!parsedForm.success) {
+		fieldErrors = parsedForm.error.flatten()['fieldErrors'];
 		return;
 	}
 
-	const newChild = { ...parsedForm.data, tally: 0 };
+	const name = parsedForm.data.name;
+	if (children.some((child) => child.name === name)) {
+		fieldErrors.name = ['Child already accounting'];
+		return;
+	}
+
+	fieldErrors = {};
+	const newChild = { name, tally: 0 };
 	children = [newChild, ...children];
+
+	e.currentTarget.reset();
 }
 </script>
 
-<div class="grid grid-cols-[1fr_300px] gap-4">
-	<div class="rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-6">
+<div class="grid lg:grid-cols-[1fr_300px] md:grid-rows-[auto_1fr] flex-col-reverse gap-4">
+	<div
+		class="rounded-lg border bg-card text-card-foreground shadow-sm p-6 space-y-6 order-2 lg:order-1">
 		<header class="space-y-1.5">
 			<h2 class="text-lg font-semibold leading-none tracking-tight">Naughty or Nice</h2>
 		</header>
@@ -115,7 +131,7 @@ function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
 			</main>
 		{/if}
 	</div>
-	<div>
+	<div class=" order-1 lg:order-2">
 		<div class="rounded-lg border bg-card text-card-foreground shadow-sm">
 			<form {onsubmit}>
 				<div class="p-6 space-y-6">
@@ -124,7 +140,18 @@ function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
 					</header>
 
 					<main>
-						<Input name="name" />
+						<Label>
+							<span>Child's name:</span>
+							<Input name="name" />
+						</Label>
+						<span class="text-sm text-muted-foreground"
+							>By default, a child is neither good nor bad</span>
+						{#if fieldErrors?.name}
+							<p class="mt-2 text-sm text-red-600 dark:text-red-500">
+								<span class="font-medium">Oops!</span>
+								{fieldErrors.name.map((err) => err).join(', ')}
+							</p>
+						{/if}
 					</main>
 
 					<footer>
