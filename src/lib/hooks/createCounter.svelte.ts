@@ -1,3 +1,10 @@
+type Options = {
+	initialValue: number;
+	max: number;
+	min: number;
+	updater: (v: number) => void;
+};
+
 /**
  * Creates a counter
  *
@@ -12,8 +19,15 @@
  * counter.reset();
  * console.log(counter()); // 0
  */
-export function createCounter(updater: (v: number) => void, initialValue = 0) {
-	let value = initialValue;
+export function createCounter(options: Partial<Options> = {}) {
+	const { initialValue, max, min, updater }: Options = {
+		initialValue: 0,
+		max: Infinity,
+		min: -Infinity,
+		updater: (v) => v,
+		...options
+	};
+	let value = $state(initialValue);
 
 	return {
 		get value() {
@@ -24,10 +38,16 @@ export function createCounter(updater: (v: number) => void, initialValue = 0) {
 			updater(value);
 		},
 		increment() {
+			if (value >= max) {
+				return;
+			}
 			value++;
 			updater(value);
 		},
 		decrement() {
+			if (value <= min) {
+				return;
+			}
 			value--;
 			updater(value);
 		},
