@@ -5,7 +5,7 @@ import Button from '$lib/components/ui/button/button.svelte';
 import Input from '$lib/components/ui/input/input.svelte';
 import Label from '$lib/components/ui/label/label.svelte';
 import * as Table from '$lib/components/ui/table';
-import { createCounter } from '$lib/hooks/createCounter.js';
+import { createCounter } from '$lib/hooks/createCounter.svelte.js';
 import { usePagination, type UsePagination } from '$lib/hooks/usePagination.svelte';
 import { useStorage } from '$lib/hooks/useStorage.svelte.js';
 import { z } from 'zod';
@@ -80,10 +80,13 @@ function onsubmit(e: SubmitEvent & { currentTarget: HTMLFormElement }) {
 					</Table.Header>
 					<Table.Body>
 						{#each pagination.dataOnPage as child}
-							{@const tally = createCounter((v) => {
-								child.tally = v;
-								children.value = children.value;
-							}, child.tally)}
+							{@const tally = createCounter({
+								updater: (v) => {
+									child.tally = v;
+									children.value = children.value;
+								},
+								initialValue: child.tally
+							})}
 							<Table.Row>
 								<Table.Cell class="font-medium">{child.name}</Table.Cell>
 								<Table.Cell class="text-center">
